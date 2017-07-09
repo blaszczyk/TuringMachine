@@ -1,0 +1,69 @@
+set srcpath src/
+set sqlpath sql/
+
+set usingforeignkeys false
+set usingtimestamp true
+set dbtype mysql
+set dbuser root
+-set dbpassword 
+set dbserver localhost
+set dbport 3306
+set dbname turing
+
+set resourcepackage turing.resources
+
+set modelpackage turing.model
+set usinginterfaces true
+set usingannotations true
+
+-set parserpackage turing.parser
+-set parserformat %sParser
+
+begin entity TuringMachine : P
+	varchar(50) name "MyTuringMachine"
+	onetoone Status
+	manytoone Program
+end entity
+
+begin entity Status : P
+	boolean running true
+	onetoone TapeCell currentCell 
+	manytoone State currentState
+end entity
+
+begin entity TapeCell : P
+	onetoone TapeCell next previous
+	enum Value value ZERO
+end entity
+
+begin enum Value
+	ZERO
+	ONE
+end enum
+
+begin entity Program : P
+	varchar(50) name "MyProgram"
+	onetoone State start starter
+end entity
+
+begin entity State : P
+	varchar(50) name "start"
+end entity
+
+begin entity Step : P
+	enum Value readValue ZERO
+	enum Value writeValue ZERO
+	enum Direction
+	manytoone State stateFrom stepTo
+	manytoone State stateTo StepFrom
+end entity
+
+begin enum Direction
+	LEFT
+	RIGHT
+end enum
+
+create sqlcreate
+create persistence
+create javamodels
+create rosefilecopy
