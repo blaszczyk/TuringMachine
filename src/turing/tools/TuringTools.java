@@ -57,13 +57,16 @@ public class TuringTools
 				return;
 			}
 		status.setRunning(false);
+		controller.update(status);
 	}
 
 	public static String createWebPage(final TuringMachine machine) 
 	{
 		final HtmlBuilder builder = new HtmlBuilder();
+		
 		final Status status = machine.getStatus();
 		builder.h1("Turing Machine: " + machine.getName());
+		builder.h2("Program: " + machine.getProgram().getName());
 		builder.append("running: " + status.isRunning());
 		
 		builder.h2("Tape:");
@@ -74,6 +77,8 @@ public class TuringTools
 				break;
 			showCell = showCell.getPrevious();
 		}
+		if(showCell.getPrevious() != null)
+			builder.append("... - ");
 		while(showCell != status.getCurrentCell())
 		{
 			builder.append(showCell.getValue() + " - " );
@@ -87,14 +92,18 @@ public class TuringTools
 				break;
 			builder.append( " - " + showCell.getValue());
 		}
+		if(showCell != null && showCell.getPrevious() != null)
+			builder.append(" - ...");
 		
 		final State state = status.getCurrentState();
 		builder.h2("Current State: " + state.getName());
 		builder.append("Possible next states:<br>");
-		builder.append("<table><tr><th>read value</th><th>write value</th><th>tape direction</th><th>state name</th></tr>");
+		builder.append("<table>");
+		builder.append("<tr><th>read value</th><th>write value</th><th>tape direction</th><th>state name</th></tr>");
 		for(final Step step : state.getStepTos())
 			builder.append(String.format("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>",step.getReadValue(), step.getWriteValue(), step.getDirection(), step.getStateTo().getName()));
 		builder.append("</table>");
+		
 		builder.append("<form method=\"post\" action=\"/turing/" + machine.getId() + "/step\">");
 		builder.append("<input type=\"submit\" value=\"step\" />");
 		builder.append("</form>");
