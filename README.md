@@ -14,4 +14,4 @@ create your TM at http://localhost:4053/web
 
 or load sql/pingpong.sql
 
-run your TM at httl://localhost:4053/turing/1
+run your TM at http://localhost:4053/turing/1
