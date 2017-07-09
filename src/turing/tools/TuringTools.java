@@ -92,7 +92,7 @@ public class TuringTools
 				break;
 			builder.append( " - " + showCell.getValue());
 		}
-		if(showCell != null && showCell.getPrevious() != null)
+		if(showCell != null && showCell.getNext() != null)
 			builder.append(" - ...");
 		
 		final State state = status.getCurrentState();
