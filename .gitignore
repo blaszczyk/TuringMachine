@@ -16,6 +16,15 @@ files/
 *.log*
 
 #
+# Rose generated files
+#
+
+src/turing/model/*
+src/turing/resources/tm.rose
+src/META-INF/persistence.xml
+sql/createtables.sql
+
+#
 # Eclipse Files
 #
 

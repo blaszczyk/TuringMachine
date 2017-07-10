@@ -1,7 +1,11 @@
 package turing.tools;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import bn.blaszczyk.rosecommon.RoseException;
 import bn.blaszczyk.rosecommon.controller.ModelController;
+import bn.blaszczyk.rosecommon.tools.EntityUtils;
 import bn.blaszczyk.roseservice.web.HtmlBuilder;
 import turing.model.Direction;
 import turing.model.State;
@@ -13,9 +17,9 @@ import turing.model.Value;
 
 public class TuringTools
 {
-
+	private static final Logger LOGGER = LogManager.getLogger(TuringTools.class);
 	
-	private static final int SHOW_CELLS = 5;
+	private static final int SHOW_CELLS_RADIUS = 5;
 
 	public static void step(final ModelController controller, final TuringMachine machine) throws RoseException
 	{
@@ -28,8 +32,9 @@ public class TuringTools
 		for(final Step step : state.getStepTos())
 			if(step.getReadValue().equals(value))
 			{
-				final State nextState = step.getStateTo();
 				final Value writeValue = step.getWriteValue();
+				cell.setValue(writeValue);
+				
 				final boolean directionRight = step.getDirection().equals(Direction.RIGHT);
 				TapeCell nextCell = directionRight ? cell.getNext() : cell.getPrevious();
 				if(nextCell == null)
@@ -46,18 +51,31 @@ public class TuringTools
 						nextCell.setNext(cell);
 					}
 				}
-				cell.setValue(writeValue);
 				status.setCurrentCell(nextCell);
-				status.setCurrentState(nextState);
-				nextCell.setStatus(status);
-				nextState.getStatuss().add(status);
 				cell.setStatus(null);
-				state.getStatuss().remove(status);
-				controller.update(status, cell, nextCell, state, nextState);
+				nextCell.setStatus(status);
+
+				final State nextState = step.getStateTo();
+				if(!EntityUtils.equals(state, nextState))
+				{
+					status.setCurrentState(nextState);
+					state.getStatuss().remove(status);
+					nextState.getStatuss().add(status);
+					controller.update(state, nextState);
+				}
+				
+				controller.update(status, cell, nextCell);
+				
+				LOGGER.info(String.format("step: machine %s with program %s", machine.getName(), machine.getProgram().getName()));
+				LOGGER.info(String.format("step: from state %s to state %s.", state.getName(), nextState.getName()));
+				LOGGER.info("step: tape direction = " + step.getDirection());
+				LOGGER.info("Tape: " + tapeToString(SHOW_CELLS_RADIUS, status.getCurrentCell(), "[%s]"));
 				return;
 			}
 		status.setRunning(false);
 		controller.update(status);
+		LOGGER.info(String.format("terminating %s with program %s at state %s.", machine.getName(), machine.getProgram().getName(), state.getName()));
+		LOGGER.info("Tape: " + tapeToString(SHOW_CELLS_RADIUS, status.getCurrentCell(), "[%s]"));
 	}
 
 	public static String createWebPage(final TuringMachine machine) 
@@ -70,30 +88,9 @@ public class TuringTools
 		builder.append("running: " + status.isRunning());
 		
 		builder.h2("Tape:");
-		TapeCell showCell = status.getCurrentCell();
-		for(int i = 0; i < SHOW_CELLS; i++)
-		{
-			if(showCell.getPrevious() == null)
-				break;
-			showCell = showCell.getPrevious();
-		}
-		if(showCell.getPrevious() != null)
-			builder.append("... - ");
-		while(showCell != status.getCurrentCell())
-		{
-			builder.append(showCell.getValue() + " - " );
-			showCell = showCell.getNext();
-		}
-		builder.append("<b>" + showCell.getValue() + "</b>");
-		for(int i = 0; i < SHOW_CELLS; i++)
-		{
-			showCell = showCell.getNext();
-			if(showCell == null)
-				break;
-			builder.append( " - " + showCell.getValue());
-		}
-		if(showCell != null && showCell.getNext() != null)
-			builder.append(" - ...");
+		final TapeCell currentCell = status.getCurrentCell();
+		builder.append(tapeToString(SHOW_CELLS_RADIUS, currentCell, "<b>%s</b>"));
+
 		
 		final State state = status.getCurrentState();
 		builder.h2("Current State: " + state.getName());
@@ -108,6 +105,36 @@ public class TuringTools
 		builder.append("<input type=\"submit\" value=\"step\" />");
 		builder.append("</form>");
 		return builder.build();
+	}
+	
+	private static String tapeToString(final int radius, final TapeCell currentCell, final String highlighter)
+	{
+		TapeCell showCell = currentCell;
+		final StringBuilder builder = new StringBuilder();
+		for(int i = 0; i < radius; i++)
+		{
+			if(showCell.getPrevious() == null)
+				break;
+			showCell = showCell.getPrevious();
+		}
+		if(showCell.getPrevious() != null)
+			builder.append("... - ");
+		while(showCell != currentCell)
+		{
+			builder.append(showCell.getValue() + " - " );
+			showCell = showCell.getNext();
+		}
+		builder.append(String.format(highlighter, showCell.getValue()));
+		for(int i = 0; i < radius; i++)
+		{
+			showCell = showCell.getNext();
+			if(showCell == null)
+				break;
+			builder.append( " - " + showCell.getValue());
+		}
+		if(showCell != null && showCell.getNext() != null)
+			builder.append(" - ...");
+		return builder.toString();
 	}
 
 }

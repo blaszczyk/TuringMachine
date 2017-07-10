@@ -27,7 +27,8 @@ public class TuringEndpoint implements Endpoint
 	{
 		try
 		{
-			final int id = Integer.parseInt(path);
+			final String[] split = path.split("\\/");
+			final int id = Integer.parseInt(split[0]);
 			final TuringMachine machine = controller.getEntityById(TuringMachine.class, id);
 			final String webPage = TuringTools.createWebPage(machine);
 			response.getWriter().write(webPage);
@@ -66,26 +67,12 @@ public class TuringEndpoint implements Endpoint
 	@Override
 	public int put(final String path, final HttpServletRequest request, final HttpServletResponse response) throws RoseException
 	{
-		try
-		{
-		}
-		catch (final Exception e) 
-		{
-			throw RoseException.wrap(e, "Error PUT@/file");
-		}
 		return HttpServletResponse.SC_NO_CONTENT;
 	}
 
 	@Override
 	public int delete(final String path, final HttpServletRequest request, final HttpServletResponse response) throws RoseException
 	{
-		try
-		{
-		}
-		catch (final Exception e) 
-		{
-			throw RoseException.wrap(e, "Error DELETE@/file");
-		}
 		return HttpServletResponse.SC_NO_CONTENT;
 	}
 
