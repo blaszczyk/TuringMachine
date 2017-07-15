@@ -1,12 +1,13 @@
 package turing.tools;
 
+import java.util.List;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import bn.blaszczyk.rosecommon.RoseException;
 import bn.blaszczyk.rosecommon.controller.ModelController;
 import bn.blaszczyk.rosecommon.tools.EntityUtils;
-import bn.blaszczyk.roseservice.web.HtmlBuilder;
 import turing.model.Direction;
 import turing.model.State;
 import turing.model.Status;
@@ -19,7 +20,7 @@ public class TuringTools
 {
 	private static final Logger LOGGER = LogManager.getLogger(TuringTools.class);
 	
-	private static final int SHOW_CELLS_RADIUS = 5;
+	static final int SHOW_CELLS_RADIUS = 5;
 
 	public static void step(final ModelController controller, final TuringMachine machine) throws RoseException
 	{
@@ -77,37 +78,8 @@ public class TuringTools
 		LOGGER.info(String.format("terminating %s with program %s at state %s.", machine.getName(), machine.getProgram().getName(), state.getName()));
 		LOGGER.info("Tape: " + tapeToString(SHOW_CELLS_RADIUS, status.getCurrentCell(), "[%s]"));
 	}
-
-	public static String createWebPage(final TuringMachine machine) 
-	{
-		final HtmlBuilder builder = new HtmlBuilder();
-		
-		final Status status = machine.getStatus();
-		builder.h1("Turing Machine: " + machine.getName());
-		builder.h2("Program: " + machine.getProgram().getName());
-		builder.append("running: " + status.isRunning());
-		
-		builder.h2("Tape:");
-		final TapeCell currentCell = status.getCurrentCell();
-		builder.append(tapeToString(SHOW_CELLS_RADIUS, currentCell, "<b>%s</b>"));
-
-		
-		final State state = status.getCurrentState();
-		builder.h2("Current State: " + state.getName());
-		builder.append("Possible next states:<br>");
-		builder.append("<table>");
-		builder.append("<tr><th>read value</th><th>write value</th><th>tape direction</th><th>state name</th></tr>");
-		for(final Step step : state.getStepTos())
-			builder.append(String.format("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>",step.getReadValue(), step.getWriteValue(), step.getDirection(), step.getStateTo().getName()));
-		builder.append("</table>");
-		
-		builder.append("<form method=\"post\" action=\"/turing/" + machine.getId() + "/step\">");
-		builder.append("<input type=\"submit\" value=\"step\" />");
-		builder.append("</form>");
-		return builder.build();
-	}
 	
-	private static String tapeToString(final int radius, final TapeCell currentCell, final String highlighter)
+	static String tapeToString(final int radius, final TapeCell currentCell, final String highlighter)
 	{
 		TapeCell showCell = currentCell;
 		final StringBuilder builder = new StringBuilder();
@@ -135,6 +107,47 @@ public class TuringTools
 		if(showCell != null && showCell.getNext() != null)
 			builder.append(" - ...");
 		return builder.toString();
+	}
+
+	public static void editTape(final ModelController controller, final TapeCell currentCell, final List<Value> values, final int pos) throws RoseException
+	{
+		TapeCell cell = isCyclic(currentCell) ? currentCell : getFirst(currentCell);
+		int countDown = pos;
+		for(final Value value : values)
+		{
+			cell.setValue(value);
+			if(countDown == 0)
+			{
+				final Status status = currentCell.getStatus();
+				currentCell.setStatus(null);
+				cell.setStatus(status);
+				status.setCurrentCell(cell);
+			}
+			controller.update(cell);
+			countDown--;
+			cell = cell.getNext();
+		}
+	}
+	
+	public static boolean isCyclic(final TapeCell currentCell)
+	{
+		TapeCell cell = currentCell.getPrevious();
+		while(true)
+		{
+			if(cell == null)
+				return false;
+			if(cell == currentCell)
+				return true;
+			cell = cell.getPrevious();
+		}
+	}
+	
+	public static TapeCell getFirst(final TapeCell currentCell)
+	{
+		TapeCell cell = currentCell;
+		while(cell.getPrevious() != null)
+			cell = cell.getPrevious();
+		return cell;
 	}
 
 }
