@@ -76,9 +76,9 @@ public class WebTools
 		if(cyclic)
 			builder.append("cyclic<br>");
 		builder.append("<br>current cell:");
-		builder.append(input("text", "pos", cyclic ? 0 : currentPos));
+		builder.append(input("text", "pos", cyclic ? 0 : --currentPos));
 		builder.append("<br>");
-		builder.append(input("submit", "editTape", "Edit Tape"));
+		builder.append(input("submit", "save", "save"));
 		builder.append("</form>");
 		return builder.toString();
 	}
