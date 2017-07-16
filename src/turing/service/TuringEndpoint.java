@@ -11,6 +11,10 @@ import javax.servlet.http.HttpServletResponse;
 import bn.blaszczyk.rosecommon.RoseException;
 import bn.blaszczyk.rosecommon.controller.ModelController;
 import bn.blaszczyk.roseservice.server.Endpoint;
+import turing.model.Direction;
+import turing.model.State;
+import turing.model.Step;
+import turing.model.TapeCell;
 import turing.model.TuringMachine;
 import turing.model.Value;
 import turing.tools.TuringTools;
@@ -32,16 +36,26 @@ public class TuringEndpoint implements Endpoint
 		try
 		{
 			final String[] split = path.split("\\/");
-			final int id = Integer.parseInt(split[0]);
-			final TuringMachine machine = controller.getEntityById(TuringMachine.class, id);
+			final int machineId = Integer.parseInt(split[0]);
 			final String webPage;
 			if(split.length == 1)
 			{
-				webPage = WebTools.createOperationPage(machine);
+				final TuringMachine machine = controller.getEntityById(TuringMachine.class, machineId);
+				webPage = WebTools.createOperationPage(machine, controller.getEntities(State.class));
 			}
-			else if(split[1].equals("edit"))
+			else if(split[1].equals("editTape"))
 			{
-				webPage = WebTools.createEditPage(machine);
+				if(split.length < 3)
+					return HttpServletResponse.SC_NOT_FOUND;
+				final int id = Integer.parseInt(split[2]);
+				final TapeCell currentCell = controller.getEntityById(TapeCell.class, id);
+				webPage = WebTools.createEditTapePage(currentCell, machineId);
+			}
+			else if(split[1].equals("editState"))
+			{
+				final int id = Integer.parseInt(request.getParameter("state"));
+				final State state = controller.getEntityById(State.class, id);
+				webPage = WebTools.createEditStatePage(state, controller.getEntities(State.class),machineId);
 			}
 			else
 			{
@@ -62,19 +76,35 @@ public class TuringEndpoint implements Endpoint
 		try
 		{
 			final String[] split = path.split("\\/");
-			final int id = Integer.parseInt(split[0]);
-			final TuringMachine machine = controller.getEntityById(TuringMachine.class, id);
-			if(split[1].equals("step"))
+			final int machineId = Integer.parseInt(split[0]);
+			if(split.length < 2)
+				return HttpServletResponse.SC_NOT_FOUND;
+			switch(split[1])
 			{
+			case "step":
+				final TuringMachine machine = controller.getEntityById(TuringMachine.class, machineId);
 				int steps = split.length > 2 ? Integer.parseInt(split[2]) : 1;
 				for(int i = 0; i < steps; i++)
 					TuringTools.step(controller,machine);
+				break;
+			case "editTape":
+				if(split.length < 3)
+					return HttpServletResponse.SC_NOT_FOUND;
+				final int tapeId = Integer.parseInt(split[2]);
+				final TapeCell currentCell = controller.getEntityById(TapeCell.class, tapeId);
+				editTape(currentCell, request.getParameterMap());
+				break;
+			case "editState":
+				if(split.length < 3)
+					return HttpServletResponse.SC_NOT_FOUND;
+				final int stateId = Integer.parseInt(split[2]);
+				final State state = controller.getEntityById(State.class, stateId);
+				editState(state, request.getParameterMap());
+				break;
+			default:		
 			}
-			else if(split[1].equals("editTape"))
-			{
-				editTape(machine, request.getParameterMap());
-			}
-			final String webPage = WebTools.createOperationPage(machine);
+			final TuringMachine machine = controller.getEntityById(TuringMachine.class, machineId);
+			final String webPage = WebTools.createOperationPage(machine, controller.getEntities(State.class));
 			response.getWriter().write(webPage);
 			return HttpServletResponse.SC_OK;
 		}
@@ -84,7 +114,41 @@ public class TuringEndpoint implements Endpoint
 		}
 	}
 
-	private void editTape(final TuringMachine machine, final Map<String, String[]> parameterMap) throws RoseException
+	private void editState(final State state, final Map<String, String[]> parameterMap) throws RoseException
+	{	
+		final String name = parameterMap.get("name")[0];
+		state.setName(name);
+		for(final Value value : Value.values())
+		{
+			final String[] terminatesValues = parameterMap.get(value.name() + "_terminates");
+			final boolean terminates = terminatesValues != null && terminatesValues.length > 0;
+			final Step step = TuringTools.stepForValue(state, value);
+			if(terminates)
+			{
+				if(step != null)
+					controller.delete(step);
+			}
+			else
+			{
+				final Value writeValue = Value.valueOf(parameterMap.get(value.name() + "_writeValue")[0]);
+				final Direction direction = Direction.valueOf(parameterMap.get(value.name() + "_direction")[0]);
+				final int nextStateId = Integer.parseInt(parameterMap.get(value.name() + "_nextState")[0]);
+				final State nextState = controller.getEntityById(State.class, nextStateId);
+				final Step writeStep = step != null ? step : controller.createNew(Step.class);
+				writeStep.setReadValue(value);
+				writeStep.setWriteValue(writeValue);
+				writeStep.setDirection(direction);
+				writeStep.setStateFrom(state);
+				state.getStepTos().add(writeStep);
+				writeStep.setStateTo(nextState);
+				nextState.getStepFroms().add(writeStep);
+				controller.update(writeStep);
+			}
+		}
+		controller.update(state);
+	}
+
+	private void editTape(final TapeCell currentCell, final Map<String, String[]> parameterMap) throws RoseException
 	{
 		final int pos = Integer.parseInt(parameterMap.get("pos")[0]);
 		final List<Value> valueList= new ArrayList<>();
@@ -96,7 +160,7 @@ public class TuringEndpoint implements Endpoint
 			valueList.add(value);
 			values = parameterMap.get("cell" + ++count);
 		}
-		TuringTools.editTape(controller, machine.getStatus().getCurrentCell(), valueList, pos);
+		TuringTools.editTape(controller, currentCell, valueList, pos);
 	}
 
 	@Override

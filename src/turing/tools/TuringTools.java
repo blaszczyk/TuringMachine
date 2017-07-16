@@ -150,4 +150,24 @@ public class TuringTools
 		return cell;
 	}
 
+	public static Step stepForValue(final State state, final Value value)
+	{
+		for(final Step step : state.getStepTos())
+			if(step.getReadValue().equals(value))
+				return step;
+		return null;
+	}
+	
+	public static Status statusForCell(final TapeCell anyCell)
+	{
+		TapeCell cell = isCyclic(anyCell) ? anyCell : getFirst(anyCell);
+		while(cell.getStatus() == null)
+		{
+			if(cell.getNext() == null || cell.getNext() == anyCell)
+				return null;
+			cell = cell.getNext();
+		}
+		return cell.getStatus();
+	}
+
 }
