@@ -79,13 +79,15 @@ public class TuringEndpoint implements Endpoint
 			final int machineId = Integer.parseInt(split[0]);
 			if(split.length < 2)
 				return HttpServletResponse.SC_NOT_FOUND;
+			final TuringMachine machine = controller.getEntityById(TuringMachine.class, machineId);
+			final String webPage;
 			switch(split[1])
 			{
 			case "step":
-				final TuringMachine machine = controller.getEntityById(TuringMachine.class, machineId);
-				int steps = split.length > 2 ? Integer.parseInt(split[2]) : 1;
+				final int steps = Integer.parseInt(request.getParameter("stepCount"));
 				for(int i = 0; i < steps; i++)
 					TuringTools.step(controller,machine);
+				webPage = WebTools.createOperationPage(machine, controller.getEntities(State.class));
 				break;
 			case "editTape":
 				if(split.length < 3)
@@ -93,6 +95,7 @@ public class TuringEndpoint implements Endpoint
 				final int tapeId = Integer.parseInt(split[2]);
 				final TapeCell currentCell = controller.getEntityById(TapeCell.class, tapeId);
 				editTape(currentCell, request.getParameterMap());
+				webPage = WebTools.createOperationPage(machine, controller.getEntities(State.class));
 				break;
 			case "editState":
 				if(split.length < 3)
@@ -100,11 +103,15 @@ public class TuringEndpoint implements Endpoint
 				final int stateId = Integer.parseInt(split[2]);
 				final State state = controller.getEntityById(State.class, stateId);
 				editState(state, request.getParameterMap());
+				webPage = WebTools.createOperationPage(machine, controller.getEntities(State.class));
 				break;
-			default:		
+			case "createState":
+				final State newState = controller.createNew(State.class);
+				webPage = WebTools.createEditStatePage(newState, controller.getEntities(State.class), machineId);
+				break;
+			default:
+				return HttpServletResponse.SC_NOT_FOUND;
 			}
-			final TuringMachine machine = controller.getEntityById(TuringMachine.class, machineId);
-			final String webPage = WebTools.createOperationPage(machine, controller.getEntities(State.class));
 			response.getWriter().write(webPage);
 			return HttpServletResponse.SC_OK;
 		}

@@ -33,10 +33,11 @@ public class WebTools
 		builder.append("<tr><th>read value</th><th>write value</th><th>tape direction</th><th>state name</th></tr>");
 		for(final Step step : state.getStepTos())
 			builder.append(String.format("<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>",step.getReadValue(), step.getWriteValue(), step.getDirection(), step.getStateTo().getName()));
-		builder.append("</table>");
+		builder.append("</table><br><br>");
 		
 		builder.append("<form method=\"post\" action=\"/turing/" + machine.getId() + "/step\">");
-		builder.append(input("submit", "step", "step"));
+		builder.append(input("text", "stepCount", 1));
+		builder.append(input("submit", "steps", "steps"));
 		builder.append("</form>");
 		builder.append("<br><form method=\"get\" action=\"/turing/")
 			.append(machine.getId())
@@ -46,11 +47,16 @@ public class WebTools
 			.append(input("submit", "editTape", "edit Tape"))
 			.append("</form>");
 		builder.append("<br><form method=\"get\" action=\"/turing/")
-			.append(machine.getId())
-			.append("/editState\">")
-			.append(input("submit", "editState", "edit State"))
-			.append(selectState("state", state, allStates))
-			.append("</form>");
+		.append(machine.getId())
+		.append("/editState\">")
+		.append(input("submit", "editState", "edit State"))
+		.append(selectState("state", state, allStates))
+		.append("</form>");
+		builder.append("<br><form method=\"post\" action=\"/turing/")
+		.append(machine.getId())
+		.append("/createState\">")
+		.append(input("submit", "createState", "create State"))
+		.append("</form>");
 		return builder.build();
 	}
 
