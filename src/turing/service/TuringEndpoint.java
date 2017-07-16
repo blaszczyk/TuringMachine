@@ -12,7 +12,9 @@ import bn.blaszczyk.rosecommon.RoseException;
 import bn.blaszczyk.rosecommon.controller.ModelController;
 import bn.blaszczyk.roseservice.server.Endpoint;
 import turing.model.Direction;
+import turing.model.Program;
 import turing.model.State;
+import turing.model.Status;
 import turing.model.Step;
 import turing.model.TapeCell;
 import turing.model.TuringMachine;
@@ -41,7 +43,7 @@ public class TuringEndpoint implements Endpoint
 			if(split.length == 1)
 			{
 				final TuringMachine machine = controller.getEntityById(TuringMachine.class, machineId);
-				webPage = WebTools.createOperationPage(machine, controller.getEntities(State.class));
+				webPage = WebTools.createOperationPage(machine, controller.getEntities(State.class), controller.getEntities(Program.class));
 			}
 			else if(split[1].equals("editTape"))
 			{
@@ -87,7 +89,7 @@ public class TuringEndpoint implements Endpoint
 				final int steps = Integer.parseInt(request.getParameter("stepCount"));
 				for(int i = 0; i < steps; i++)
 					TuringTools.step(controller,machine);
-				webPage = WebTools.createOperationPage(machine, controller.getEntities(State.class));
+				webPage = WebTools.createOperationPage(machine, controller.getEntities(State.class), controller.getEntities(Program.class));
 				break;
 			case "editTape":
 				if(split.length < 3)
@@ -95,7 +97,7 @@ public class TuringEndpoint implements Endpoint
 				final int tapeId = Integer.parseInt(split[2]);
 				final TapeCell currentCell = controller.getEntityById(TapeCell.class, tapeId);
 				editTape(currentCell, request.getParameterMap());
-				webPage = WebTools.createOperationPage(machine, controller.getEntities(State.class));
+				webPage = WebTools.createOperationPage(machine, controller.getEntities(State.class), controller.getEntities(Program.class));
 				break;
 			case "editState":
 				if(split.length < 3)
@@ -103,11 +105,22 @@ public class TuringEndpoint implements Endpoint
 				final int stateId = Integer.parseInt(split[2]);
 				final State state = controller.getEntityById(State.class, stateId);
 				editState(state, request.getParameterMap());
-				webPage = WebTools.createOperationPage(machine, controller.getEntities(State.class));
+				webPage = WebTools.createOperationPage(machine, controller.getEntities(State.class), controller.getEntities(Program.class));
 				break;
 			case "createState":
 				final State newState = controller.createNew(State.class);
 				webPage = WebTools.createEditStatePage(newState, controller.getEntities(State.class), machineId);
+				break;
+			case "load":
+				final int programId = Integer.parseInt(request.getParameter("program"));
+				final Program program = controller.getEntityById(Program.class, programId);
+				machine.setProgram(program);
+				program.getTuringMachines().add(machine);
+				final Status status = machine.getStatus();
+				status.setCurrentState(program.getStart());
+				program.getStart().getStatuss().add(status);
+				controller.update(machine,program,status);
+				webPage = WebTools.createOperationPage(machine, controller.getEntities(State.class), controller.getEntities(Program.class));
 				break;
 			default:
 				return HttpServletResponse.SC_NOT_FOUND;

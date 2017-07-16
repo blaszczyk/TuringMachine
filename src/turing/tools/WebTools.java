@@ -12,7 +12,7 @@ import bn.blaszczyk.rosecommon.tools.EntityUtils;
 public class WebTools
 {
 
-	public static String createOperationPage(final TuringMachine machine, final List<State> allStates) 
+	public static String createOperationPage(final TuringMachine machine, final List<State> allStates, final List<Program> allPrograms) 
 	{
 		final HtmlBuilder builder = new HtmlBuilder();
 		
@@ -46,6 +46,12 @@ public class WebTools
 			.append("\">")
 			.append(input("submit", "editTape", "edit Tape"))
 			.append("</form>");
+		builder.append("<br><form method=\"post\" action=\"/turing/")
+		.append(machine.getId())
+		.append("/load\">")
+		.append(input("submit", "load", "load Program"))
+		.append(selectProgram("program", machine.getProgram(), allPrograms))
+		.append("</form>");
 		builder.append("<br><form method=\"get\" action=\"/turing/")
 		.append(machine.getId())
 		.append("/editState\">")
@@ -134,6 +140,25 @@ public class WebTools
 			.append(state.equals(selectedState) ? " selected " : "")
 		    .append(">")
 			.append(state.getName())
+			.append("</option>");
+		sb.append("</select>");
+		return sb.toString();
+	}
+	
+
+	private static String selectProgram(final String name, final Program selectedProgram, final List<Program> allPrograms)
+	{
+		final StringBuilder sb = new StringBuilder();
+		sb.append("<select name=\"")
+		.append(name)
+		.append("\">");
+		for(final Program program : allPrograms)
+			sb.append("<option value=\"")
+			.append(program.getId())
+			.append("\"")
+			.append(program.equals(selectedProgram) ? " selected " : "")
+		    .append(">")
+			.append(program.getName())
 			.append("</option>");
 		sb.append("</select>");
 		return sb.toString();
