@@ -119,6 +119,7 @@ public class TuringEndpoint implements Endpoint
 				final Status status = machine.getStatus();
 				status.setCurrentState(program.getStart());
 				program.getStart().getStatuss().add(status);
+				status.setRunning(true);
 				controller.update(machine,program,status);
 				webPage = WebTools.createOperationPage(machine, controller.getEntities(State.class), controller.getEntities(Program.class));
 				break;
