@@ -14,7 +14,6 @@ import bn.blaszczyk.roseservice.server.Endpoint;
 import turing.model.Direction;
 import turing.model.Program;
 import turing.model.State;
-import turing.model.Status;
 import turing.model.Step;
 import turing.model.TapeCell;
 import turing.model.TuringMachine;
@@ -113,14 +112,7 @@ public class TuringEndpoint implements Endpoint
 				break;
 			case "load":
 				final int programId = Integer.parseInt(request.getParameter("program"));
-				final Program program = controller.getEntityById(Program.class, programId);
-				machine.setProgram(program);
-				program.getTuringMachines().add(machine);
-				final Status status = machine.getStatus();
-				status.setCurrentState(program.getStart());
-				program.getStart().getStatuss().add(status);
-				status.setRunning(true);
-				controller.update(machine,program,status);
+				TuringTools.loadProgram(programId, machine, controller);
 				webPage = WebTools.createOperationPage(machine, controller.getEntities(State.class), controller.getEntities(Program.class));
 				break;
 			default:
@@ -159,10 +151,8 @@ public class TuringEndpoint implements Endpoint
 				writeStep.setReadValue(value);
 				writeStep.setWriteValue(writeValue);
 				writeStep.setDirection(direction);
-				writeStep.setStateFrom(state);
-				state.getStepTos().add(writeStep);
-				writeStep.setStateTo(nextState);
-				nextState.getStepFroms().add(writeStep);
+				writeStep.setEntity(Step.STATEFROM, state);
+				writeStep.setEntity(Step.STATETO, nextState);
 				controller.update(writeStep);
 			}
 		}

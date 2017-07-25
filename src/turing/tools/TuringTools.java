@@ -9,6 +9,7 @@ import bn.blaszczyk.rosecommon.RoseException;
 import bn.blaszczyk.rosecommon.controller.ModelController;
 import bn.blaszczyk.rosecommon.tools.EntityUtils;
 import turing.model.Direction;
+import turing.model.Program;
 import turing.model.State;
 import turing.model.Status;
 import turing.model.Step;
@@ -41,27 +42,14 @@ public class TuringTools
 				if(nextCell == null)
 				{
 					nextCell = controller.createNew(TapeCell.class);
-					if(directionRight)
-					{
-						cell.setNext(nextCell);
-						nextCell.setPrevious(cell);
-					}
-					else
-					{
-						cell.setPrevious(nextCell);
-						nextCell.setNext(cell);
-					}
+					cell.setEntity(directionRight ? TapeCell.NEXT : TapeCell.PREVIOUS, nextCell);
 				}
-				status.setCurrentCell(nextCell);
-				cell.setStatus(null);
-				nextCell.setStatus(status);
+				status.setEntity(Status.CURRENTCELL, nextCell);
 
 				final State nextState = step.getStateTo();
 				if(!EntityUtils.equals(state, nextState))
 				{
-					status.setCurrentState(nextState);
-					state.getStatuss().remove(status);
-					nextState.getStatuss().add(status);
+					status.setEntity(Status.CURRENTSTATE, nextState);
 					controller.update(state, nextState);
 				}
 				
@@ -119,14 +107,22 @@ public class TuringTools
 			if(countDown == 0)
 			{
 				final Status status = currentCell.getStatus();
-				currentCell.setStatus(null);
-				cell.setStatus(status);
-				status.setCurrentCell(cell);
+				cell.setEntity(TapeCell.STATUS, status);
 			}
 			controller.update(cell);
 			countDown--;
 			cell = cell.getNext();
 		}
+	}
+	
+	public static void loadProgram(final int programId, final TuringMachine machine, final ModelController controller) throws RoseException
+	{
+		final Program program = controller.getEntityById(Program.class, programId);
+		machine.setEntity(TuringMachine.PROGRAM, program);
+		final Status status = machine.getStatus();
+		status.setEntity(Status.CURRENTSTATE, program.getStart());
+		status.setRunning(true);
+		controller.update(machine,program,status);
 	}
 	
 	public static boolean isCyclic(final TapeCell currentCell)

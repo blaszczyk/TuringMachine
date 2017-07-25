@@ -3,6 +3,9 @@
   <groupId>turing</groupId>
   <artifactId>TuringMachine</artifactId>
   <version>0.0.1</version>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
   <dependencies>
   	<dependency>
   		<groupId>bn.blaszczyk</groupId>
@@ -46,7 +49,7 @@
           <programs>
             <program>
               <mainClass>turing.service.TuringServiceLauncher</mainClass>
-              <name>service</name>
+              <id>service</id>
             </program>
           </programs>
         </configuration>
