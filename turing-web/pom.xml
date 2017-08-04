@@ -47,6 +47,11 @@
   		<artifactId>roseweb</artifactId>
   		<version>0.0.1</version>
   	</dependency>
+        <dependency>
+          <groupId>turing</groupId>
+          <artifactId>turing-common</artifactId>
+          <version>${turing.version}</version>
+        </dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>

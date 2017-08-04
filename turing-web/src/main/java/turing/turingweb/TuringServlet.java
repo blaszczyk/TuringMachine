@@ -1,7 +1,6 @@
 package turing.turingweb;
 
 import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import com.vaadin.annotations.VaadinServletConfiguration;
@@ -18,14 +17,13 @@ public class TuringServlet extends VaadinServlet {
 
 	private static final long serialVersionUID = -1132289994117995097L;
 	
-	private static final String ROSE_FILE = "/WEB-INF/classes/turing/resources/tm.rose";
+	private static final String ROSE_FILE = "turing/resources/tm.rose";
 	
 	@Override
 	public void init(final ServletConfig servletConfig) throws ServletException
 	{
 		super.init(servletConfig);
-		final ServletContext servletContext = servletConfig.getServletContext();
-		TypeManager.parseRoseFile(servletContext.getResourceAsStream(ROSE_FILE));
+		TypeManager.parseRoseFile(this.getClass().getClassLoader().getResourceAsStream(ROSE_FILE));
 		Preferences.setMainClass(TuringServlet.class);
 	}
     	
