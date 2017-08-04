@@ -19,9 +19,9 @@ files/
 # Rose generated files
 #
 
-src/turing/model/*
-src/turing/resources/tm.rose
-src/META-INF/persistence.xml
+turing-common/src/turing/model/*
+turing-common/src/turing/resources/tm.rose
+turing-common/src/META-INF/persistence.xml
 sql/createtables.sql
 
 #
@@ -80,3 +80,4 @@ local.properties
 .recommenders/
 /bin1/
 /target/
+*/target/

@@ -1,5 +1,6 @@
-set srcpath src/
+set srcpath turing-common/src/
 set sqlpath sql/
+set resourcepath turing-common/src/
 
 set usingforeignkeys false
 set usingtimestamp true
