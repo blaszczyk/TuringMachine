@@ -1,16 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>turing</groupId>
-    <artifactId>TuringMachine</artifactId>
+    <artifactId>turing-machine</artifactId>
     <version>${turing.version}</version>
   </parent>
   <artifactId>turing-common</artifactId>
   <dependencies>
     <dependency>
-    	<groupId>bn.blaszczyk</groupId>
-    	<artifactId>RoseCommon</artifactId>
-    	<version>0.27</version>
+      <groupId>bn.blaszczyk</groupId>
+      <artifactId>rose-common</artifactId>
+      <version>0.34</version>
     </dependency>
   </dependencies>
   <build>
@@ -26,8 +27,8 @@
     <plugins>
       <plugin>
         <groupId>bn.blaszczyk</groupId>
-        <artifactId>ROSE</artifactId>
-        <version>0.108</version>
+        <artifactId>rose</artifactId>
+        <version>0.115</version>
         <configuration>
           <rosefile>rose/tm.rose</rosefile>
         </configuration>

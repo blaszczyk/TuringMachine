@@ -6,6 +6,7 @@ import javax.servlet.annotation.WebServlet;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.server.VaadinServlet;
 
+import bn.blaszczyk.rose.RoseException;
 import bn.blaszczyk.rosecommon.tools.Preferences;
 import bn.blaszczyk.rosecommon.tools.TypeManager;
 import bn.blaszczyk.roseweb.RoseWebUI;
@@ -23,8 +24,15 @@ public class TuringServlet extends VaadinServlet {
 	public void init(final ServletConfig servletConfig) throws ServletException
 	{
 		super.init(servletConfig);
-		TypeManager.parseRoseFile(this.getClass().getClassLoader().getResourceAsStream(ROSE_FILE));
-		Preferences.setMainClass(TuringServlet.class);
+		try
+		{
+			TypeManager.parseRoseFile(this.getClass().getClassLoader().getResourceAsStream(ROSE_FILE));
+			Preferences.setMainClass(TuringServlet.class);
+		}
+		catch(final RoseException e)
+		{
+			throw new ServletException("error initializing turing web servlet", e);
+		}
 	}
     	
 }

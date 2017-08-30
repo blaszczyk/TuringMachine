@@ -2,7 +2,7 @@ package turing.service;
 
 import org.apache.logging.log4j.LogManager;
 
-import bn.blaszczyk.rosecommon.RoseException;
+import bn.blaszczyk.rose.RoseException;
 import bn.blaszczyk.rosecommon.tools.CommonPreference;
 import bn.blaszczyk.rosecommon.tools.LoggerConfigurator;
 import bn.blaszczyk.rosecommon.tools.Preferences;
@@ -15,11 +15,11 @@ public class TuringServiceLauncher extends Launcher {
 	
 	public static void main(String[] args)
 	{
-		Preferences.setMainClass(TuringServiceLauncher.class);
-		TypeManager.parseRoseFile(TuringServiceLauncher.class.getClassLoader().getResourceAsStream(ROSE_FILE));
-		LoggerConfigurator.configureLogger(CommonPreference.BASE_DIRECTORY, CommonPreference.LOG_LEVEL);
 		try
 		{
+			Preferences.setMainClass(TuringServiceLauncher.class);
+			TypeManager.parseRoseFile(TuringServiceLauncher.class.getClassLoader().getResourceAsStream(ROSE_FILE));
+			LoggerConfigurator.configureLogger(CommonPreference.BASE_DIRECTORY, CommonPreference.LOG_LEVEL);
 			new TuringServiceLauncher().launch();
 		}
 		catch (RoseException e)
