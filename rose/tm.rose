@@ -1,6 +1,6 @@
-set srcpath turing-common/src/
-set sqlpath sql/
-set resourcepath turing-common/src/
+set srcpath src/
+set sqlpath ../sql/
+set resourcepath src/
 
 set usingforeignkeys false
 set usingtimestamp true
@@ -67,4 +67,5 @@ end enum
 create sqlcreate
 create persistence
 create javamodels
+create javadtos
 create rosefilecopy

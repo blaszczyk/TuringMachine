@@ -18,7 +18,7 @@ public class TuringServiceLauncher extends Launcher {
 		try
 		{
 			Preferences.setMainClass(TuringServiceLauncher.class);
-			TypeManager.parseRoseFile(TuringServiceLauncher.class.getClassLoader().getResourceAsStream(ROSE_FILE));
+			TypeManager.parseRoseFile(ROSE_FILE);
 			LoggerConfigurator.configureLogger(CommonPreference.BASE_DIRECTORY, CommonPreference.LOG_LEVEL);
 			new TuringServiceLauncher().launch();
 		}

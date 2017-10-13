@@ -26,7 +26,7 @@ public class TuringServlet extends VaadinServlet {
 		super.init(servletConfig);
 		try
 		{
-			TypeManager.parseRoseFile(this.getClass().getClassLoader().getResourceAsStream(ROSE_FILE));
+			TypeManager.parseRoseFile(ROSE_FILE);
 			Preferences.setMainClass(TuringServlet.class);
 		}
 		catch(final RoseException e)

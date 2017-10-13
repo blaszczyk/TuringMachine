@@ -1,7 +1,6 @@
 package turing.service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -184,12 +183,6 @@ public class TuringEndpoint implements Endpoint
 	public int delete(final String path, final HttpServletRequest request, final HttpServletResponse response) throws RoseException
 	{
 		return HttpServletResponse.SC_NO_CONTENT;
-	}
-
-	@Override
-	public Map<String, String> status()
-	{
-		return Collections.singletonMap("endpoint /turing", "active");
 	}
 
 }

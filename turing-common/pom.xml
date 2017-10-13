@@ -11,7 +11,7 @@
     <dependency>
       <groupId>bn.blaszczyk</groupId>
       <artifactId>rose-common</artifactId>
-      <version>0.34</version>
+      <version>0.43</version>
     </dependency>
   </dependencies>
   <build>
@@ -28,9 +28,9 @@
       <plugin>
         <groupId>bn.blaszczyk</groupId>
         <artifactId>rose</artifactId>
-        <version>0.115</version>
+        <version>0.130</version>
         <configuration>
-          <rosefile>rose/tm.rose</rosefile>
+          <rosefile>../rose/tm.rose</rosefile>
         </configuration>
       </plugin>
       <plugin>
